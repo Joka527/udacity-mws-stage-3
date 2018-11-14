@@ -3,7 +3,7 @@ import idb from 'idb';
 let cacheID = 'mws-restaurant-001';
 
 let dbPromise = idb.open('mws-restaurant-stage-2', 1, upgradeDb => {
-    let keyValStore = upgradeDb.createObjectStore('restaurants');
+    let keyValStore = upgradeDb.createObjectStore('restaurants', {keyPath:'id'});
 
 })
 
@@ -32,7 +32,7 @@ self.addEventListener('fetch', function(event) {
 
     if (reqURLObj.port === '1337'){
         const pathsArr= reqURLObj.pathname.split('/');
-        const id = pathsArr[pathsArr.length-1] === 'restaurants' ? null : pathsArr[pathsArr.length-1];
+        const id = pathsArr[pathsArr.length-1] === 'restaurants' ? -1 : pathsArr[pathsArr.length-1];
         if(id){
             event.respondWith(
                 dbPromise.then(db => {
@@ -55,15 +55,29 @@ self.addEventListener('fetch', function(event) {
                 })
                 .then(final => new Response(JSON.stringify(final)))
             );
-        }   
+        }
     }else{
         if (reqURLObj.href.indexOf('restaurant.html') > -1 ){
             cacheRequest = new Request('restaurant.html');
         }
         event.respondWith(
             caches.match(cacheRequest).then(function(response) {
-                return response || fetch(event.request);
+                return response || 
+                       fetch(event.request)
+                       .then(resp => {
+                           return caches.open(cacheID).then(cacheOpened => {
+                               cacheOpened.put(event.request, resp.clone());
+                                return resp;
+                           })
+                        })
+                        .catch(err =>{
+                            return new response("App is offline",
+                                {   status:404,
+                                    statusText: "App is offline"
+                                });
+                        })
             })
-        );
+            
+        )
     }
   });
