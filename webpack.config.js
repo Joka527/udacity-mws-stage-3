@@ -2,6 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const ServiceWorkerWebpackPlugin = require('serviceworker-webpack-plugin');
+const ManifestPlugin = require('webpack-manifest-plugin');
 
 module.exports = {
     mode:'development',
@@ -19,7 +20,7 @@ module.exports = {
                 test: /\.js$/,
                 use: [
                     'babel-loader',
-                    'eslint-loader'
+                    // 'eslint-loader'
                 ],
                 exclude: /node-modules/
             },
@@ -47,7 +48,31 @@ module.exports = {
         }),
         new ServiceWorkerWebpackPlugin({
             entry: path.join(__dirname, 'src/js/sw.js'),
-          })
+        }),
+        new ManifestPlugin({
+            fileName: 'manifest.json',
+            basePath: '.',
+            seed: {
+                short_name:'Reviews App',
+                name: 'Restaurant Reviews App',
+                start_url:'.',
+                background_color:'#eee',
+                icons: [
+                    {
+                        "src": "assets/icons/app_icon_256.png",
+                        "sizes": "256x256",
+                        "type": "image/png"
+                    },
+                    {
+                        "src": "assets/icons/app_icon_512.png",
+                        "sizes": "512x512",
+                        "type": "image/png"
+                    }
+                ],
+                display:'minimal-ui',
+                theme_color:'#eee'
+            }
+        })
     ]
 };
 
