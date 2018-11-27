@@ -1,5 +1,6 @@
 import DBHelper from './dbhelper.js';
 import * as L from 'leaflet';
+import { ftruncate } from 'fs';
 
 var restaurants,
   neighborhoods,
@@ -161,12 +162,23 @@ const fillRestaurantsHTML = (restaurants) => {
 const createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
   const image = document.createElement('img');
-  
+  const favorite = document.createElement('button');
+
   image.className = 'restaurant-img';
   image.alt=restaurant.name;
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
   li.append(image);
 
+  favorite.innerHTML = '';
+  favorite.classList.add('fav');
+
+  favorite.onclick = function(){
+    const isFav = !restaurant.is_favorite;
+    DBHelper.updateFavStatus(restaurant.id, isFav);
+    restaurant.is_favorite = !restaurant.is_favorite;
+    updateFavClass(favorite, restaurant.is_favorite); 
+  }
+  
   const name = document.createElement('h1');
   name.innerHTML = restaurant.name;
   li.append(name);
@@ -191,6 +203,17 @@ const createRestaurantHTML = (restaurant) => {
   return li
 }
 
+const updateFavClass = (el, isFav) => {
+  if (isFav){
+    el.classList.remove('notFav');
+    el.classList.add('fav');
+    el.setAttribute('aria-label', 'remove from favorites!');
+  }else{
+    el.classList.remove('notFav');
+    el.classList.add('notFav');
+    el.setAttribute('aria-label', 'add to favorites!');
+  }
+}
 /**
  * Add markers for current restaurants to the map.
  */

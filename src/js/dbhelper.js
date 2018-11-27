@@ -171,6 +171,25 @@ class DBHelper {
     );
     return marker;
   } */
+  
+  static updateFavStatus(id, isFav){
+    let fetchURL= DBHelper.DATABASE_URL +'restaurants/'+id+'/?is_favorite='+isFav;
+    fetch(fetchURL, { method: 'PUT' })
+      .then(resp => {
+        console.log(resp.json());
+        this.dbPromise()
+        .then(db => {
+          let tx = db.transaction('restaurants', 'readWrite');
+          let restStore = tx.objectStore('restaurants');
+          restStore.get(id)
+            .then(restaurant =>{  
+              restaurant.is_favorite = isFav;
+              restStore.put(restaurant);
+            })
+        })
+      }) 
+      .catch(err => console.error("Request failed, returned: ${err}"));  
+  }
 
 }
 
