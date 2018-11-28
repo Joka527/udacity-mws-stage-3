@@ -1,6 +1,5 @@
 import DBHelper from './dbhelper.js';
 import * as L from 'leaflet';
-import { ftruncate } from 'fs';
 
 var restaurants,
   neighborhoods,
@@ -169,7 +168,7 @@ const createRestaurantHTML = (restaurant) => {
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
   li.append(image);
 
-  favorite.innerHTML = '';
+  favorite.innerHTML = '❤';
   favorite.classList.add('fav');
 
   favorite.onclick = function(){
@@ -178,7 +177,9 @@ const createRestaurantHTML = (restaurant) => {
     restaurant.is_favorite = !restaurant.is_favorite;
     updateFavClass(favorite, restaurant.is_favorite); 
   }
-  
+  updateFavClass(favorite, restaurant.is_favorite); 
+  li.append(favorite);
+
   const name = document.createElement('h1');
   name.innerHTML = restaurant.name;
   li.append(name);

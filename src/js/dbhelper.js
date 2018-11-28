@@ -1,5 +1,6 @@
-//import idb from 'idb';
+import idb from 'idb';
 import * as L from 'leaflet';
+
 /**
  * Common database helper functions.
  */
@@ -14,6 +15,11 @@ class DBHelper {
     return `http://localhost:${port}/`;
   }
 
+  static get DB_PROMISE(){
+    return idb.open('mws-restaurant-stage-2', 1, upgradeDb => {
+      let keyValStore = upgradeDb.createObjectStore('restaurants', {keyPath:'id'});
+    })
+  }
   /**
    * Fetch all restaurants.
    */
@@ -177,9 +183,9 @@ class DBHelper {
     fetch(fetchURL, { method: 'PUT' })
       .then(resp => {
         console.log(resp.json());
-        this.dbPromise()
+        DBHelper.DB_PROMISE
         .then(db => {
-          let tx = db.transaction('restaurants', 'readWrite');
+          let tx = db.transaction('restaurants', 'readwrite');
           let restStore = tx.objectStore('restaurants');
           restStore.get(id)
             .then(restaurant =>{  
@@ -188,7 +194,7 @@ class DBHelper {
             })
         })
       }) 
-      .catch(err => console.error("Request failed, returned: ${err}"));  
+      .catch(err => console.error("Request failed, returned: "+err));  
   }
 
 }

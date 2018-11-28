@@ -32,7 +32,7 @@ self.addEventListener('fetch', function(event) {
 
     if (reqURLObj.port === '1337'){
         const pathsArr= reqURLObj.pathname.split('/');
-        const id = pathsArr[pathsArr.length-1] === 'restaurants' ? -1 : pathsArr[pathsArr.length-1];
+        const id = pathsArr[pathsArr.length-1] === 'restaurants' ? null : pathsArr[pathsArr.length-1];
         if(id){
             event.respondWith(
                 dbPromise.then(db => {
