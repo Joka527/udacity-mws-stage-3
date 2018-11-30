@@ -210,7 +210,7 @@ const updateFavClass = (el, isFav) => {
     el.classList.add('fav');
     el.setAttribute('aria-label', 'remove from favorites!');
   }else{
-    el.classList.remove('notFav');
+    el.classList.remove('fav');
     el.classList.add('notFav');
     el.setAttribute('aria-label', 'add to favorites!');
   }

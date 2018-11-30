@@ -214,6 +214,7 @@ nav h1 a {
 
 #restaurants-list li button.fav {
   position: absolute;
+  color: rgb(245, 2, 2);
   top: 0px;
   right: 20px;
   background-color: Transparent;
@@ -223,6 +224,25 @@ nav h1 a {
   overflow: hidden;
   outline: none;
   font-size: 21pt;
+  text-shadow: black 4px 0px 4px;
+  margin: 20px 0 0;
+  padding: 0;
+  max-width: 45px;
+}
+
+#restaurants-list li button.notFav {
+  position: absolute;
+  color: #fff;
+  top: 0px;
+  right: 20px;
+  background-color: Transparent;
+  background-repeat: no-repeat;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  outline: none;
+  font-size: 21pt;
+  text-shadow: black 4px 0px 4px;
   margin: 20px 0 0;
   padding: 0;
   max-width: 45px;
@@ -314,13 +334,13 @@ nav h1 a {
   display:none;
 }
 
-#reviews-container {
+#reviews-container, #review-form-container {
   border-bottom: 1px solid #d9d9d9;
   border-top: 1px solid #fff;
   padding: 30px 30px 80px;
 }
 
-#reviews-container h2 {
+#reviews-container h2, #review-form-container h2 {
   color: #f58500;
   font-size: 24px;
   font-weight: 550;
@@ -368,6 +388,69 @@ nav h1 a {
 
 .skip-link:focus {
   top:0;
+}
+
+/* ====================== Restaurant Details Form ====================== */
+#review-form-container{
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.submit-form{
+	width: 85%;
+	background: #FFF;
+	padding: 30px;
+	margin: 0 35px 0;
+}
+
+.submit-form label{
+  padding: 15px 0 0;
+}
+
+.submit-form select{
+  width:100%;
+}
+
+.submit-form input{
+  width:100%;
+	box-sizing: border-box; 
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box; 
+	padding: 8px;
+}
+
+.submit-form textarea{
+	width: 100%;
+  height: 100px;
+  padding:0;
+}
+
+.submit-form textarea:focus{
+  box-shadow: 0 0 5px rgb(252, 152, 3);
+	border:1px solid rgb(216, 124, 4);
+}
+
+.submit-form button {
+  width:100%;
+  margin: 15px 0 0;
+  -moz-box-shadow: inset 0px 1px 0px 0px #f58500;
+	-webkit-box-shadow: inset 0px 1px 0px 0px #f58500;
+	box-shadow: inset 0px 1px 0px 0px #f58500;
+	background-color: #f58500;
+	border: 1px solid #d17401;
+	display: inline-block;
+	cursor: pointer;
+	color: #FFFFFF;
+	padding: 10px 18px;
+	text-decoration: none;
+	font: 18px Arial, Helvetica, sans-serif;
+}
+.submit-form button:hover, 
+.submit-form button:hover {
+	background: linear-gradient(to bottom, #f58700c2 5%, #f58500 100%);
+	background-color: #b66503d3;
 }
 
 /* ====================== Media Queries ====================== */

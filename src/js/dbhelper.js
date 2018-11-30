@@ -16,8 +16,14 @@ class DBHelper {
   }
 
   static get DB_PROMISE(){
-    return idb.open('mws-restaurant-stage-2', 1, upgradeDb => {
-      let keyValStore = upgradeDb.createObjectStore('restaurants', {keyPath:'id'});
+    return idb.open('mws-restaurant-stage-3', 2, upgradeDb => {
+      switch(upgradeDb.oldVersion){
+        case 0:
+          upgradeDb.createObjectStore('restaurants', {keyPath:'id'});
+        case 1: 
+          upgradeDb.createObjectStore('reviews', {keyPath:'id'});
+      }
+      
     })
   }
   /**
@@ -29,7 +35,7 @@ class DBHelper {
     fetch(fetchURL, { method: 'GET' })
       .then(resp => resp.json())
         .then(restaurants => callback(null, restaurants))
-        .catch(err => callback("Request failed, returned ${err}", null));
+        .catch(err => callback("Request failed, returned:" +err, null));
   }
 
   /**
@@ -188,14 +194,88 @@ class DBHelper {
           let tx = db.transaction('restaurants', 'readwrite');
           let restStore = tx.objectStore('restaurants');
           restStore.get(id)
-            .then(restaurant =>{  
-              restaurant.is_favorite = isFav;
-              restStore.put(restaurant);
+            .then(restaurant =>{
+              if(restaurant){
+                restaurant.is_favorite = isFav;
+                restStore.put(restaurant);
+              }  
             })
         })
       }) 
       .catch(err => console.error("Request failed, returned: "+err));  
   }
+
+  static getReviewsByRestaurantId(id){
+    let fetchURL = DBHelper.DATABASE_URL+'reviews/?restaurant_id='+id;
+    return fetch(fetchURL, { method: 'GET'})
+      .then(resp => resp.json())
+      .then(reviews => {
+        DBHelper.DB_PROMISE
+          .then(db => {
+            if (!db) return;
+            let tx = db.transaction('reviews', 'readwrite');
+            let revStore = tx.objectStore('reviews');
+            if(Array.isArray(reviews)){
+              reviews.forEach(function(review){
+                revStore.put(review);
+              })
+            }else{ revStore.put(reviews); }
+          })
+        return Promise.resolve(reviews);
+      })
+      .catch(err => { //when fetch fails = offline
+        return DBHelper.getIDBObjById('mws-restaurant-stage-3','reviews', id)
+          .then(reviews => {
+              return Promise.resolve(reviews);
+          })
+      })  
+  }
+
+  static getIDBObjById(index, table, id){
+    return DBHelper.DB_PROMISE
+      .then(db =>{
+        if (!db) return;
+        let tx = db.transaction(table);
+        let store = tx.objectStore(table);
+        let indexName = store.index(index);
+        return indexName.getAll(id);
+      })
+  }
+
+  static saveNewReview(reviewObj){
+    let fetchURL = DBHelper.DATABASE_URL+'reviews/';
+    if (!navigator.onLine){
+        this.saveLater(reviewObj);
+      }
+
+      let reviewDBObj ={
+        restaurant_id: parseInt(reviewObj.restaurant_id),
+        name: reviewObj.name,
+        rating: parseInt(reviewObj.rating),
+        comments: reviewObj.comments
+      }
+
+      let fetchOptions={
+        method: 'POST',
+        body: JSON.stringify(reviewDBObj),
+        //headers: new Headers({ 'content-type': 'application/json'})
+      }; 
+      fetch(fetchURL, fetchOptions)
+        .then(resp =>{
+          console.log('Saved Successfully with ' + resp.status + ': '+resp.statusText);
+        })
+        .catch(err => console.log('Save failed with error: '+err));
+  }
+
+  static saveLater(reviewObj){
+    localStorage.setItem('reviewToSave', JSON.stringify(reviewObj));
+    window.addEventListener('online', e => {
+      let reviewToSave = localStorage.getItem('reviewToSave');
+      if(reviewToSave) DBHelper.saveNewReview(reviewObj);
+      localStorage.removeItem('reviewToSave');
+    })  
+  }
+
 
 }
 

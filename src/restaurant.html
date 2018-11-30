@@ -54,6 +54,28 @@
         </section>
     </section>
     <!-- end restaurant -->
+    <!-- Beignning review form -->
+    <section id="review-form-container">
+      <h2 id="review-form-header">Add Review</h2>
+      <form id="review-form" class="submit-form">
+        <label for="reviewer-name">Name:</label>
+        <input id="reviewer-name" type="text" >
+        <div class="rating-container">
+          <label for="review-rating">Rating:</label>
+          <select aria-label="Select rating" id="review-rating">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+        </div>
+        <label for="review-comments">Comments:</label>
+        <textarea id="review-comments"></textarea>
+        <button type="button" id="review-form-submit">Add Review</button>
+      </form>
+    </section>
+    <!-- End review form -->
     <!-- Beginning reviews -->
     <section id="reviews-container">
       <ul id="reviews-list"></ul>

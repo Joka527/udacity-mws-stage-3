@@ -9,6 +9,7 @@ var newMap;
  */
 document.addEventListener('DOMContentLoaded', () => {  
   initMap();
+  attachSubmitEvent();
 });
 
 /**
@@ -67,15 +68,21 @@ const fetchRestaurantFromURL = (callback) => {
     let error = 'No restaurant id in URL'
     callback(error, null);
   } else {
+    //fetch restaurants
     DBHelper.fetchRestaurantById(id, (error, restaurantData) => {
       restaurant = restaurantData;
       if (!restaurant) {
         console.error(error);
         return;
       }
-      fillRestaurantHTML(restaurant);
       callback(null, restaurant)
     });
+    //fetch reviews
+    DBHelper.getReviewsByRestaurantId(id)
+      .then(reviews => {
+        restaurant.reviews=reviews;
+        fillRestaurantHTML(restaurant); 
+      });
   }
 }
 
@@ -147,6 +154,11 @@ const fillReviewsHTML = (reviews) => {
     return;
   }
   const ul = document.getElementById('reviews-list');
+  reviews.sort(function(a,b){ 
+    if(!(a.createdAt instanceof Date)) a.createdAt = new Date(a.createdAt);
+    if(!(b.createdAt instanceof Date)) b.createdAt = new Date(b.createdAt);
+    return b.createdAt - a.createdAt
+  });
   reviews.forEach(review => {
     ul.appendChild(createReviewHTML(review));
   });
@@ -165,7 +177,7 @@ const createReviewHTML = (review) => {
   li.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  date.innerHTML = new Date(review.createdAt).toString();
   li.appendChild(date);
 
   const rating = document.createElement('p');
@@ -205,4 +217,31 @@ const getParameterByName = (name, url) => {
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
 
+function attachSubmitEvent(){
+   document.getElementById('review-form-submit').onclick= function(){
+    let rid = getParameterByName('id');
+    let rname = document.getElementById('reviewer-name').value;
+    let rrating = document.querySelector('#review-rating option:checked').value;
+    let rcomments = document.getElementById('review-comments').value;
 
+    let reviewObj = {
+      restaurant_id: rid,
+      name: rname,
+      rating: rrating,
+      comments: rcomments,
+      createdAt: new Date()
+    };
+    console.log(reviewObj);
+    DBHelper.saveNewReview(reviewObj);
+    addReviewToHTML(reviewObj);
+    document.getElementById('review-form').reset();
+
+    }; 
+}
+
+const addReviewToHTML = (reviewObj) => {
+  if (document.getElementById('no-review')) document.getElementById('no-review').remove();
+  restaurant.reviews.push(reviewObj);
+  const ul = document.getElementById('reviews-list');
+  ul.insertBefore(createReviewHTML(reviewObj), ul.firstChild);
+}

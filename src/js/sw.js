@@ -2,8 +2,13 @@ import idb from 'idb';
 
 let cacheID = 'mws-restaurant-001';
 
-let dbPromise = idb.open('mws-restaurant-stage-2', 1, upgradeDb => {
-    let keyValStore = upgradeDb.createObjectStore('restaurants', {keyPath:'id'});
+let dbPromise = idb.open('mws-restaurant-stage-3', 2, upgradeDb => {
+        switch(upgradeDb.oldVersion){
+          case 0:
+            upgradeDb.createObjectStore('restaurants', {keyPath:'id'});
+          case 1: 
+            upgradeDb.createObjectStore('reviews', {keyPath:'id'});
+        }
 
 })
 
@@ -32,7 +37,7 @@ self.addEventListener('fetch', function(event) {
 
     if (reqURLObj.port === '1337'){
         const pathsArr= reqURLObj.pathname.split('/');
-        const id = pathsArr[pathsArr.length-1] === 'restaurants' ? null : pathsArr[pathsArr.length-1];
+        const id = pathsArr[pathsArr.length-1] === 'restaurants' ? -1 : pathsArr[pathsArr.length-1];
         if(id){
             event.respondWith(
                 dbPromise.then(db => {
